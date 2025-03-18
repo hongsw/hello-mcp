@@ -1,0 +1,29 @@
+{
+  "name": "hello-mcp",
+  "version": "1.0.0",
+  "description": "hello-mcp is a tour and guide to Claude Desktop MCP Config Manager for MCP(Model Context Protocol) beginners",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "hello-mcp": "./index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "axios": "^1.6.2",
+    "chalk": "^4.1.2",
+    "cli-spinners": "^2.9.0",
+    "conf": "^10.2.0",
+    "inquirer": "^8.2.5",
+    "node-emoji": "^2.2.0",
+    "ora": "^5.4.1",
+    "rc": "^1.2.8",
+    "zod": "^3.24.2"
+  },
+  "telemetry": {
+    "enabled": true,
+    "anonymizeData": true
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
