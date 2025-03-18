@@ -93,6 +93,38 @@ function saveApiKey(apiKey) {
   return true;
 }
 
+// 이메일 입력 처리 함수
+async function processEmailInput(userInfo) {
+  let spinner = ora('🔍 API 키를 생성하고 있어요...').start();
+  
+  try {
+    const apiKey = await garakClient.createApiKey(userInfo.email, userInfo.purpose);
+    spinner.succeed('API 키가 생성되었어요.');
+    return { success: true, apiKey };
+  } catch (error) {
+    spinner.fail('API 키 생성 중 오류가 발생했습니다.');
+    console.error(chalk.red(error.message));
+    
+    // 이미 활성화된 API 키가 있는 이메일 오류 처리
+    if (error.message.includes('이미 활성화된 API 키가 있는 이메일입니다')) {
+      const choice = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'action',
+          message: '어떻게 진행할까요?',
+          choices: [
+            { name: '다른 이메일 주소로 시도하기', value: 'retry' },
+            { name: '프로그램 종료하기', value: 'exit' }
+          ]
+        }
+      ]);
+      
+      return { success: false, action: choice.action };
+    }
+    
+    return { success: false, action: 'error', message: error.message };
+  }
+}
 
 async function main() {
   console.clear();
@@ -142,16 +174,61 @@ async function main() {
 
   try {
     // 대화형 설정 진행
-    const userInfo = await conversation.startConversation();
+    let userInfo = await conversation.startConversation();
+    let apiKeyResult;
     
-    // API 키 생성
-    const spinner = ora('🔍 API 키를 생성하고 있어요...').start();
-    const apiKey = await garakClient.createApiKey(userInfo.email, userInfo.purpose);
-    spinner.succeed('API 키가 생성되었어요.');
+    // 이메일 처리 로직
+    while (true) {
+      apiKeyResult = await processEmailInput(userInfo);
+      
+      if (apiKeyResult.success) {
+        break; // 성공하면 루프 종료
+      } else if (apiKeyResult.action === 'exit') {
+        console.log(chalk.blue('설정을 종료합니다. 감사합니다!'));
+        return; // 프로그램 종료
+      } else if (apiKeyResult.action === 'retry') {
+        // 새 이메일 주소 입력 받기
+        const emailPrompt = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'email',
+            message: '새 이메일 주소를 입력해주세요:',
+            validate: (input) => {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              return emailRegex.test(input) ? true : '유효한 이메일 주소를 입력해주세요';
+            }
+          }
+        ]);
+        
+        userInfo.email = emailPrompt.email; // 이메일 업데이트
+        continue; // 루프 계속
+      } else {
+        // 다른 오류 처리
+        console.log(chalk.red(`오류: ${apiKeyResult.message || '알 수 없는 오류가 발생했습니다'}`));
+        
+        const retry = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'shouldRetry',
+            message: '다시 설정을 시도할까요?',
+            default: true
+          }
+        ]);
+        
+        if (retry.shouldRetry) {
+          userInfo = await conversation.startConversation(); // 처음부터 다시 시작
+          continue;
+        } else {
+          console.log(chalk.yellow('문제가 지속되면 help@garak.ai로 문의해주세요.'));
+          return;
+        }
+      }
+    }
+    
+    const apiKey = apiKeyResult.apiKey;
     
     // 설정 파일 준비
-    spinner.text = '⏳ 설정 파일을 준비하고 있어요...';
-    spinner.start();
+    const spinner = ora('⏳ 설정 파일을 준비하고 있어요...').start();
     
     // API 키 저장
     saveApiKey(apiKey);

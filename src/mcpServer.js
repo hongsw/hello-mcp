@@ -34,7 +34,7 @@ server.tool("send-email",
         }
         
         // 설정 파일에서 baseUrl을 가져오거나 기본값 사용
-        const serverUrl = config.BASE_URL || "https://api.garak.im/api/send";
+        const serverUrl = config.BASE_URL || "https://garak.wwwai.site/api/send";
 
         try {
             const response = await fetch(serverUrl, {
@@ -53,6 +53,7 @@ server.tool("send-email",
                 serverResponse: result
             };
         } catch (error) {
+            console.error(error);
             return {
                 content: [{ type: "text", text: "이메일 전송 중 오류가 발생했습니다." }],
                 error: error.message

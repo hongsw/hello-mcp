@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import * as emoji from 'node-emoji'
 
 async function startConversation() {
-  console.log(chalk.cyan(`안녕하세요! 제 이름은 가락이에요. 함께 설정을 진행할게요.`));
+  console.log(chalk.cyan(emoji.emojify(':wave: 안녕하세요! 제 이름은 :smiley: 가락이에요. 함께 설정을 진행할게요.')));
   
   // 목적 질문
   const purposeResponse = await inquirer.prompt([
