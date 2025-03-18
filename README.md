@@ -1,4 +1,5 @@
-# 🚀 Hello-MCP: Help tool to setup Claude Desktop MCP Config Manager
+# 🚀 Hello MCP(Model Context Protocol)
+### "Tour and Guide Tool for Setting Up Claude Desktop MCP Config Manager"
 
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14-brightgreen.svg)](https://nodejs.org/en/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
