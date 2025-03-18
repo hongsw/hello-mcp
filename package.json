@@ -19,7 +19,13 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "hello-mcp": "./index.js"
+    "hello-mcp": "index.js"
+  },
+  "scripts": {
+    "deploy:patch": "git add . && git commit -m \"Patch release\" && npm version patch && npm publish",
+    "deploy:minor": "git add . && git commit -m \"Minor release\" && npm version minor && npm publish",
+    "deploy:major": "git add . && git commit -m \"Major release\" && npm version major && npm publish",
+    "deploy": "npm run deploy:patch"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
