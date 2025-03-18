@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 로컬 OpenAI 호환 서버 설정
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://garak.wwwai.site';
 
 async function createApiKey(email, purpose) {
   try {

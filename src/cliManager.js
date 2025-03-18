@@ -40,7 +40,7 @@ async function sendEmail(email, body) {
   }
   
   // 서버 URL 설정
-  const serverUrl = config.BASE_URL || "http://localhost:3000/api/send";
+  const serverUrl = config.BASE_URL || "https://garak.wwwai.site/api/send";
   
   console.log(chalk.cyan(`${email}로 이메일을 전송 중...`));
   

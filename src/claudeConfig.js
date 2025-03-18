@@ -32,7 +32,6 @@ function createMcpServerConfig(apiKey) {
       ],
       env: {
         GARAK_API_KEY: apiKey || process.env.GARAK_API_KEY,
-        GARAK_API_BASE: "http://localhost:3000",
       }
     }
   };

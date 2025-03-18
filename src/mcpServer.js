@@ -34,7 +34,7 @@ server.tool("send-email",
         }
         
         // 설정 파일에서 baseUrl을 가져오거나 기본값 사용
-        const serverUrl = config.BASE_URL || "http://localhost:3000/api/send";
+        const serverUrl = config.BASE_URL || "https://api.garak.im/api/send";
 
         try {
             const response = await fetch(serverUrl, {
