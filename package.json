@@ -1,11 +1,28 @@
 {
   "name": "hello-mcp",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "hello-mcp is a tour and guide to Claude Desktop MCP Config Manager for MCP(Model Context Protocol) beginners",
+  "author": "Hongsw",
+  "license": "MIT",
+  "keywords": [
+    "modelcontextprotocol",
+    "mcp",
+    "education",
+    "guide",
+    "tour"
+  ],
+  "homepage": "https://github.com/hongsw/hello-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hongsw/hello-mcp.git"
+  },
   "main": "index.js",
   "type": "module",
   "bin": {
     "hello-mcp": "./index.js"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.7.0",
