@@ -1,17 +1,13 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { createRequire } from 'module';
-
-// CommonJS 모듈 로드를 위한 require 함수 생성
-const require = createRequire(import.meta.url);
-const rc = require("rc");
+import rc from "rc";
 const config = rc("garak"); // ~/.garakrc에서 설정 불러옴
 
 
 // Create an MCP server
 const server = new McpServer({
-  name: "Demo",
+  name: "Hello-MCP-Server",
   version: "1.0.0"
 });
 
@@ -80,3 +76,5 @@ server.resource(
 // Start receiving messages on stdin and sending messages on stdout
 const transport = new StdioServerTransport();
 await server.connect(transport);
+
+export default server;

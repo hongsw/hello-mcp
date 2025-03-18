@@ -11,8 +11,8 @@ const __dirname = path.dirname(__filename);
  * MCP 서버를 시작하는 함수
  */
 export async function startServer() {
-  // mcp-server.js 파일 경로
-  const serverScriptPath = path.join(__dirname, 'mcp-server.js');
+  // mcpServer.js 파일 경로
+  const serverScriptPath = path.join(__dirname, 'mcpServer.js');
   
   // 파일 존재 확인
   if (!fs.existsSync(serverScriptPath)) {
@@ -27,9 +27,7 @@ export async function startServer() {
   
   // 프로세스 종료 시 처리
   serverProcess.on('close', (code) => {
-    if (code !== 0) {
-      console.log(`MCP 서버가 종료되었습니다. 종료 코드: ${code}`);
-    }
+    // 종료 코드가 0이 아닌 경우에도 로그를 출력하지 않음
   });
   
   // 프로세스 에러 처리
@@ -40,7 +38,7 @@ export async function startServer() {
   // 서버 시작 시간 대기
   return new Promise(resolve => {
     setTimeout(() => {
-      console.log('MCP 서버가 시작되었습니다.');
+      // 서버가 시작되면 true 반환
       resolve(true);
     }, 1000);
   });

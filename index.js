@@ -33,7 +33,7 @@ const mode = args[0] || 'setup'; // 기본값은 setup 모드
 
 // MCP 서버 시작 함수
 async function startMcpServer() {
-  console.log(chalk.cyan.bold('\n🚀 MCP 서버 모드로 시작합니다...'));
+  // console.error(chalk.cyan.bold('\n🚀 MCP 서버 모드로 시작합니다...'));
   
   try {
     // MCP 서버 관련 모듈 동적 로드
