@@ -33,12 +33,18 @@ const mode = args[0] || 'setup'; // 기본값은 setup 모드
 
 // MCP 서버 시작 함수
 async function startMcpServer() {
-  // console.error(chalk.cyan.bold('\n🚀 MCP 서버 모드로 시작합니다...'));
   
   try {
-    // MCP 서버 관련 모듈 동적 로드
-    const mcpManager = await import('./src/mcpManager.js');
-    await mcpManager.startServer();
+    // mcpManager 대신 직접 mcpServer.js 모듈 로드
+    const mcpServerPath = path.join(__dirname, 'src', 'mcpServer.js');
+    
+    // 파일 존재 확인
+    if (!fs.existsSync(mcpServerPath)) {
+      throw new Error(`MCP 서버 스크립트를 찾을 수 없습니다: ${mcpServerPath}`);
+    }
+    
+    // mcpServer.js 모듈 직접 import 및 실행
+    await import('./src/mcpServer.js');
   } catch (error) {
     console.error(chalk.red('MCP 서버 실행 중 오류가 발생했습니다:', error.message));
   }
