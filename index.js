@@ -40,7 +40,7 @@ async function startMcpServer() {
     
     // 파일 존재 확인
     if (!fs.existsSync(mcpServerPath)) {
-      throw new Error(`MCP 서버 스크립트를 찾을 수 없습니다: ${mcpServerPath}`);
+    throw new Error(`MCP 서버 스크립트를 찾을 수 없습니다: ${mcpServerPath}`);
     }
     
     // mcpServer.js 모듈 직접 import 및 실행
