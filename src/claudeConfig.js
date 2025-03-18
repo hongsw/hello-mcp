@@ -26,7 +26,8 @@ function createMcpServerConfig(apiKey) {
     "garak": {
       command: "npx",
       args: [
-        "hi-garak",
+        "-y",
+        "github:hongsw/hello-mcp",
         "mcp-server"
       ],
       env: {
