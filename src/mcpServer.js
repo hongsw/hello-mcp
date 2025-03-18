@@ -47,11 +47,17 @@ server.tool("send-email",
             });
 
             const result = await response.json();
-
-            return {
-                content: [{ type: "text", text: "이메일을 성공적으로 보냈습니다." }],
-                serverResponse: result
-            };
+            if(result.status === 200) {
+                return {
+                    content: [{ type: "text", text: "이메일을 성공적으로 보냈습니다." }],
+                    serverResponse: result
+                };
+            } else {
+                return {
+                    content: [{ type: "text", text: `이메일 전송 중 오류가 발생했습니다. ${result.message} 다시 시도해주세요. error : ${result.error}` }],
+                    error: result.message
+                };
+            }
         } catch (error) {
             console.error(error);
             return {
