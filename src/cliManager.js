@@ -57,6 +57,7 @@ async function sendEmail(email, body) {
     });
     
     const result = await response.json();
+    console.log(result);
     console.log(chalk.green('이메일을 성공적으로 보냈습니다.'));
     return result;
   } catch (error) {
