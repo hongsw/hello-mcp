@@ -1,4 +1,6 @@
 import axios from 'axios';
+import rc from "rc";
+
 const config = rc("garak"); // ~/.garakrc에서 설정 불러옴
 
 // 로컬 OpenAI 호환 서버 설정

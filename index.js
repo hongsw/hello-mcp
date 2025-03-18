@@ -8,9 +8,8 @@ import path from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
 import { setupClaudeConfig } from './src/claudeConfig.js';
-// CommonJS 모듈 로드를 위한 require 함수 생성
-const require = createRequire(import.meta.url);
-const rc = require('rc');
+import rc from "rc";
+
 
 // 모듈 경로 설정
 const __filename = fileURLToPath(import.meta.url);

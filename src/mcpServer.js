@@ -2,6 +2,7 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mc
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import rc from "rc";
+
 const config = rc("garak"); // ~/.garakrc에서 설정 불러옴
 
 
