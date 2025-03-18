@@ -1,7 +1,8 @@
 import axios from 'axios';
+const config = rc("garak"); // ~/.garakrc에서 설정 불러옴
 
 // 로컬 OpenAI 호환 서버 설정
-const API_BASE_URL = 'https://garak.wwwai.site';
+const API_BASE_URL = config.BASE_URL ? `${config.BASE_URL}/api/send` : "https://garak.wwwai.site/api/send";
 
 async function createApiKey(email, purpose) {
   try {
