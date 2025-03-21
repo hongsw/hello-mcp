@@ -9,6 +9,7 @@ import fs from 'fs';
 import { createRequire } from 'module';
 import { setupClaudeConfig } from './src/claudeConfig.js';
 import rc from "rc";
+import { __, setLanguage, getCurrentLanguage, getAvailableLanguages } from './src/i18n.js';
 
 
 // 모듈 경로 설정
@@ -39,27 +40,27 @@ async function startMcpServer() {
     
     // 파일 존재 확인
     if (!fs.existsSync(mcpServerPath)) {
-    throw new Error(`MCP 서버 스크립트를 찾을 수 없습니다: ${mcpServerPath}`);
+    throw new Error(__('MCP 서버 스크립트를 찾을 수 없습니다: {path}', { path: mcpServerPath }));
     }
     
     // mcpServer.js 모듈 직접 import 및 실행
     await import('./src/mcpServer.js');
   } catch (error) {
-    console.error(chalk.red('MCP 서버 실행 중 오류가 발생했습니다:', error.message));
+    console.error(chalk.red(__('MCP 서버 실행 중 오류가 발생했습니다: {error}', { error: error.message })));
   }
 }
 
 // CLI 모드 함수
 async function startCliMode() {
-  console.log(chalk.cyan.bold('\n🖥️ CLI 모드로 시작합니다...'));
+  console.log(chalk.cyan.bold(__('\n🖥️ CLI 모드로 시작합니다...')));
   
   const command = args[1]; // 두 번째 인자는 명령어
   
   if (!command) {
-    console.log(chalk.yellow('사용법: npx hi-garak cli [command] [options]'));
-    console.log(chalk.cyan('가능한 명령어:'));
-    console.log('  send-email [email] [body] - 이메일 전송');
-    console.log('  add [a] [b] - 두 숫자 더하기');
+    console.log(chalk.yellow(__('사용법: npx hi-garak cli [command] [options]')));
+    console.log(chalk.cyan(__('가능한 명령어:')));
+    console.log(__('  send-email [email] [body] - 이메일 전송'));
+    console.log(__('  add [a] [b] - 두 숫자 더하기'));
     return;
   }
   
@@ -68,8 +69,8 @@ async function startCliMode() {
     const cliManager = await import('./src/cliManager.js');
     await cliManager.executeCommand(command, args.slice(2));
   } catch (error) {
-    console.error(chalk.red('CLI 명령 실행 중 오류가 발생했습니다:', error.message));
-    console.log(chalk.yellow('문제가 지속되면 help@garak.ai로 문의해주세요.'));
+    console.error(chalk.red(__('CLI 명령 실행 중 오류가 발생했습니다: {error}', { error: error.message })));
+    console.log(chalk.yellow(__('문제가 지속되면 help@garak.ai로 문의해주세요.')));
   }
 }
 
@@ -100,14 +101,14 @@ function saveApiKey(apiKey) {
 
 // 이메일 입력 처리 함수
 async function processEmailInput(userInfo) {
-  let spinner = ora('🔍 API 키를 생성하고 있어요...').start();
+  let spinner = ora(__('🔍 API 키를 생성하고 있어요...')).start();
   
   try {
     const apiKey = await garakClient.createApiKey(userInfo.email, userInfo.purpose);
-    spinner.succeed('API 키가 생성되었어요.');
+    spinner.succeed(__('API 키가 생성되었어요.'));
     return { success: true, apiKey };
   } catch (error) {
-    spinner.fail('API 키 생성 중 오류가 발생했습니다.');
+    spinner.fail(__('API 키 생성 중 오류가 발생했습니다.'));
     console.error(chalk.red(error.message));
     
     // 이미 활성화된 API 키가 있는 이메일 오류 처리
@@ -116,10 +117,10 @@ async function processEmailInput(userInfo) {
         {
           type: 'list',
           name: 'action',
-          message: '어떻게 진행할까요?',
+          message: __('어떻게 진행할까요?'),
           choices: [
-            { name: '다른 이메일 주소로 시도하기', value: 'retry' },
-            { name: '프로그램 종료하기', value: 'exit' }
+            { name: __('다른 이메일 주소로 시도하기'), value: 'retry' },
+            { name: __('프로그램 종료하기'), value: 'exit' }
           ]
         }
       ]);
@@ -131,48 +132,86 @@ async function processEmailInput(userInfo) {
   }
 }
 
+/**
+ * 언어 설정 관리 함수
+ */
+async function handleLanguageSettings() {
+  const languages = getAvailableLanguages();
+  const currentLang = getCurrentLanguage();
+  
+  const { selectedLang } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectedLang',
+      message: __('사용할 언어를 선택하세요:'),
+      choices: languages.map(lang => ({
+        name: lang === 'ko' ? '한국어' : 
+              lang === 'en' ? 'English' : 
+              lang === 'ja' ? '日本語' : 
+              lang === 'zh' ? '中文' : 
+              lang === 'es' ? 'Español' : 
+              lang === 'fr' ? 'Français' : 
+              lang === 'de' ? 'Deutsch' : 
+              lang === 'ru' ? 'Русский' : 
+              lang === 'pt' ? 'Português' : 
+              lang === 'it' ? 'Italiano' : 
+              lang === 'ar' ? 'العربية' : 
+              lang === 'hi' ? 'हिन्दी' : 
+              lang,
+        value: lang,
+        checked: lang === currentLang
+      }))
+    }
+  ]);
+  
+  if (selectedLang !== currentLang) {
+    setLanguage(selectedLang);
+    console.log(chalk.green(__('언어가 변경되었습니다.')));
+  }
+}
+
 async function main() {
-  console.clear();
+  // console.clear();
   
   // 환영 메시지 출력
-  console.log(chalk.cyan.bold('\n✨ Hello Garak에 오신 것을 환영합니다! ✨'));
-  console.log(chalk.cyan('AI 에이전트를 위한 도구를 쉽게 설정해 드릴게요.\n'));
+  console.log(chalk.cyan.bold(__('\n✨ Hello Garak에 오신 것을 환영합니다! ✨')));
+  console.log(chalk.cyan(__('AI 에이전트를 위한 도구를 쉽게 설정해 드릴게요.\n')));
 
   // Claude Desktop 설치 확인
   if (!utils.isClaudeDesktopInstalled()) {
-    console.log(chalk.yellow('⚠️ Claude Desktop이 설치되어 있지 않은 것 같습니다.'));
-    console.log(chalk.yellow('설치 후 다시 시도해주세요: https://claude.ai/download'));
+    console.log(chalk.yellow(__('⚠️ Claude Desktop이 설치되어 있지 않은 것 같습니다.')));
+    console.log(chalk.yellow(__('설치 후 다시 시도해주세요: https://claude.ai/download')));
     
     const shouldContinue = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'continue',
-        message: '그래도 계속 진행할까요?',
+        message: __('그래도 계속 진행할까요?'),
         default: false
       }
     ]);
     
     if (!shouldContinue.continue) {
-      console.log(chalk.blue('설치 후 다시 실행해주세요. 감사합니다!'));
+      console.log(chalk.blue(__('설치 후 다시 실행해주세요. 감사합니다!')));
       return;
     }
   }
   
   // 이미 API 키가 설정되어 있는지 확인
   if (config && config.GARAK_API_KEY) {
-    console.log(chalk.yellow('이미 설정된 API 키가 있습니다:', config.GARAK_API_KEY));
+    console.log(chalk.yellow(__('이미 설정된 API 키가 있습니다: {key}', { key: config.GARAK_API_KEY })));
     
     const resetConfig = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'reset',
-        message: '설정을 다시 하시겠습니까?',
+        message: __('설정을 다시 하시겠습니까?'),
         default: false
       }
     ]);
     
     if (!resetConfig.reset) {
-      console.log(chalk.green('기존 설정을 유지합니다. 감사합니다!'));
+      console.log(chalk.green(__('기존 설정을 유지합니다. 감사합니다!')));
       return;
     }
   }
@@ -189,7 +228,7 @@ async function main() {
       if (apiKeyResult.success) {
         break; // 성공하면 루프 종료
       } else if (apiKeyResult.action === 'exit') {
-        console.log(chalk.blue('설정을 종료합니다. 감사합니다!'));
+        console.log(chalk.blue(__('설정을 종료합니다. 감사합니다!')));
         return; // 프로그램 종료
       } else if (apiKeyResult.action === 'retry') {
         // 새 이메일 주소 입력 받기
@@ -197,10 +236,10 @@ async function main() {
           {
             type: 'input',
             name: 'email',
-            message: '새 이메일 주소를 입력해주세요:',
+            message: __('새 이메일 주소를 입력해주세요:'),
             validate: (input) => {
               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-              return emailRegex.test(input) ? true : '유효한 이메일 주소를 입력해주세요';
+              return emailRegex.test(input) ? true : __('유효한 이메일 주소를 입력해주세요');
             }
           }
         ]);
@@ -209,13 +248,13 @@ async function main() {
         continue; // 루프 계속
       } else {
         // 다른 오류 처리
-        console.log(chalk.red(`오류: ${apiKeyResult.message || '알 수 없는 오류가 발생했습니다'}`));
+        console.log(chalk.red(__('오류: {error}', { error: apiKeyResult.message || __('알 수 없는 오류가 발생했습니다') })));
         
         const retry = await inquirer.prompt([
           {
             type: 'confirm',
             name: 'shouldRetry',
-            message: '다시 설정을 시도할까요?',
+            message: __('다시 설정을 시도할까요?'),
             default: true
           }
         ]);
@@ -224,7 +263,7 @@ async function main() {
           userInfo = await conversation.startConversation(); // 처음부터 다시 시작
           continue;
         } else {
-          console.log(chalk.yellow('문제가 지속되면 help@garak.ai로 문의해주세요.'));
+          console.log(chalk.yellow(__('문제가 지속되면 help@garak.ai로 문의해주세요.')));
           return;
         }
       }
@@ -233,7 +272,7 @@ async function main() {
     const apiKey = apiKeyResult.apiKey;
     
     // 설정 파일 준비
-    const spinner = ora('⏳ 설정 파일을 준비하고 있어요...').start();
+    const spinner = ora(__('⏳ 설정 파일을 준비하고 있어요...')).start();
     
     // API 키 저장
     saveApiKey(apiKey);
@@ -241,44 +280,44 @@ async function main() {
     // MCP 서버 설정
     setupClaudeConfig(apiKey);
     
-    spinner.succeed('설정 파일이 준비되었어요.');
+    spinner.succeed(__('설정 파일이 준비되었어요.'));
     
     // 완료 메시지
-    console.log(chalk.green('\n✅ 모든 준비가 완료되었어요!\n'));
-    console.log(`당신의 Garak API 키: ${chalk.yellow(apiKey)}`);
-    console.log(chalk.gray('(이 키는 일일 50회 요청으로 제한됩니다)'));
+    console.log(chalk.green(__('\n✅ 모든 준비가 완료되었어요!\n')));
+    console.log(__('당신의 Garak API 키: {key}', { key: chalk.yellow(apiKey) }));
+    console.log(chalk.gray(__('(이 키는 일일 50회 요청으로 제한됩니다)')));
 
     // OpenTelemetry 정보 제공
-    console.log(chalk.blue('\n📊 OpenTelemetry 정보:'));
-    console.log('- 사용자 상호작용과 성능 데이터를 수집하여 서비스 품질을 개선합니다.');
-    console.log('- 수집된 데이터는 익명화되어 저장됩니다.');
-    console.log('- 언제든지 설정에서 비활성화할 수 있습니다.');
+    console.log(chalk.blue(__('\n📊 OpenTelemetry 정보:')));
+    console.log(__('- 사용자 상호작용과 성능 데이터를 수집하여 서비스 품질을 개선합니다.'));
+    console.log(__('- 수집된 데이터는 익명화되어 저장됩니다.'));
+    console.log(__('- 언제든지 설정에서 비활성화할 수 있습니다.'));
 
     // 성공 메시지
-    console.log(chalk.green.bold('\n🎉 축하합니다! Claude Desktop 설정이 완료되었습니다.'));
-    console.log('\n✅ API 키가 안전하게 저장되었습니다');
+    console.log(chalk.green.bold(__('\n🎉 축하합니다! Claude Desktop 설정이 완료되었습니다.')));
+    console.log(__('\n✅ API 키가 안전하게 저장되었습니다'));
 
 
-    console.log(chalk.cyan('✅ Claude Desktop 설정이 완료되었습니다'));
-    console.log('✅ MCP 서버 설정이 완료되었습니다');
+    console.log(chalk.cyan(__('✅ Claude Desktop 설정이 완료되었습니다')));
+    console.log(__('✅ MCP 서버 설정이 완료되었습니다'));
     
     // Claude Desktop 재시작 시도
     try {
       const restarted = await utils.restartClaudeDesktop();
       if (restarted) {
-        console.log('✅ Claude Desktop이 재시작되었습니다');
+        console.log(__('✅ Claude Desktop이 재시작되었습니다'));
       } else {
-        console.log(chalk.yellow('⚠️ Claude Desktop을 자동으로 재시작할 수 없습니다. 직접 재시작해주세요.'));
+        console.log(chalk.yellow(__('⚠️ Claude Desktop을 자동으로 재시작할 수 없습니다. 직접 재시작해주세요.')));
       }
     } catch (restartError) {
-      console.log(chalk.yellow('⚠️ Claude Desktop 재시작 중 오류가 발생했습니다. 직접 재시작해주세요.'));
+      console.log(chalk.yellow(__('⚠️ Claude Desktop 재시작 중 오류가 발생했습니다. 직접 재시작해주세요.')));
     }
     
-    console.log(chalk.cyan('\n이제 Claude와 함께 다음을 시도해보세요:'));
-    console.log(chalk.white(`\n"${userInfo.email} 로 "1 add 1" 결과를 메일보내줘."`));
+    console.log(chalk.cyan(__('\n이제 Claude와 함께 다음을 시도해보세요:')));
+    console.log(chalk.white(__('\n"{email} 로 \"1 add 1\" 결과를 메일보내줘."', { email: userInfo.email })));
 
-    console.log(chalk.cyan('\n더 많은 예제와 팁을 보려면 브라우저에서 가이드를 확인하세요:'));
-    console.log(chalk.blue('https://garak.ai/getting-started\n'));
+    console.log(chalk.cyan(__('\n더 많은 예제와 팁을 보려면 브라우저에서 가이드를 확인하세요:')));
+    console.log(chalk.blue(__('https://garak.ai/getting-started\n')));
     
     // // 웹사이트 열기
     // setTimeout(() => {
@@ -286,41 +325,50 @@ async function main() {
     // }, 2000);
     
   } catch (error) {
-    console.error(chalk.red('설정 중 오류가 발생했습니다:', error.message));
+    console.error(chalk.red(__('설정 중 오류가 발생했습니다: {error}', { error: error.message })));
     
     // 오류 발생 시 재시도 옵션
     const retry = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'shouldRetry',
-        message: '다시 설정을 시도할까요?',
+        message: __('다시 설정을 시도할까요?'),
         default: true
       }
     ]);
     
     if (retry.shouldRetry) {
-      console.log(chalk.cyan('설정을 다시 시작합니다...'));
+      console.log(chalk.cyan(__('설정을 다시 시작합니다...')));
       return main(); // 재귀적으로 다시 시작
     } else {
-      console.log(chalk.yellow('문제가 지속되면 help@garak.ai로 문의해주세요.'));
+      console.log(chalk.yellow(__('문제가 지속되면 help@garak.ai로 문의해주세요.')));
     }
   }
 }
 
 // 사용법 출력 함수
 function printUsage() {
-  console.log(chalk.cyan.bold('\n📚 Hi-Garak 사용법:'));
-  console.log(chalk.white('npx hi-garak [mode] [options]'));
-  console.log(chalk.cyan('\n사용 가능한 모드:'));
-  console.log(chalk.white('  <빈 값> 또는 setup - 설정 도우미를 실행합니다'));
-  console.log(chalk.white('  mcp-server - MCP 서버 모드로 실행합니다'));
-  console.log(chalk.white('  cli - CLI 모드로 실행합니다'));
-  console.log(chalk.white('  help - 도움말을 출력합니다'));
-  console.log(chalk.cyan('\n예시:'));
-  console.log(chalk.white('  npx hi-garak'));
-  console.log(chalk.white('  npx hi-garak mcp-server'));
-  console.log(chalk.white('  npx hi-garak cli add 3 5'));
-  console.log(chalk.white('  npx hi-garak cli send-email user@example.com "안녕하세요"\n'));
+  console.log(`
+${chalk.cyan('Hello MCP CLI')} - ${__('Model Context Protocol 가이드')}
+
+${chalk.yellow(__('사용법:'))}
+  npx hello-mcp [명령어]
+
+${chalk.yellow(__('명령어:'))}
+  setup     : ${__('초기 설정')}
+  help      : ${__('도움말 표시')}
+  version   : ${__('버전 정보 표시')}
+  lang      : ${__('언어 설정')}
+  
+${chalk.yellow(__('예시:'))}
+  npx hello-mcp setup
+  npx hello-mcp lang
+  `);
+}
+
+// 언어 설정 명령어 처리
+if (mode === 'lang' || mode === 'language') {
+  handleLanguageSettings();
 }
 
 // 모드에 따라 적절한 함수 실행
@@ -339,7 +387,7 @@ switch (mode) {
     break;
   default:
     if (mode.startsWith('-')) {
-      console.log(chalk.yellow(`알 수 없는 옵션: ${mode}`));
+      console.log(chalk.yellow(__(`알 수 없는 옵션: ${mode}`)));
       printUsage();
     } else {
       main(); // 기본값은 설정 모드

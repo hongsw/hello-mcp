@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { createRequire } from 'module';
+import { __ } from './i18n.js'; // i18n 모듈 가져오기
 
 // CommonJS 모듈 로드를 위한 require 함수 생성
 const require = createRequire(import.meta.url);
@@ -20,7 +21,7 @@ export async function executeCommand(command, args) {
       return add(parseFloat(args[0]), parseFloat(args[1]));
       
     default:
-      throw new Error(`알 수 없는 명령어: ${command}`);
+      throw new Error(__('unknown_command', { command }));
   }
 }
 
@@ -31,19 +32,18 @@ export async function executeCommand(command, args) {
  */
 async function sendEmail(email, body) {
   if (!email || !body) {
-    throw new Error('이메일 주소와 내용이 필요합니다.');
+    throw new Error(__('missing_email'));
   }
   
   const token = config.GARAK_API_KEY;
   if (!token) {
-    throw new Error('API KEY가 없습니다. `npx hi-garak --refresh-token` 명령어로 API KEY를 생성해주세요.');
+    throw new Error(__('missing_api_key'));
   }
   
   // 서버 URL 설정
-
   const serverUrl = config.BASE_URL ? `${config.BASE_URL}/api/send` : "https://garak.wwwai.site/api/send";
   
-  console.log(chalk.cyan(`${email}로 이메일을 전송 중...`));
+  console.log(chalk.cyan(__('email_sending', { email })));
   
   // API 요청
   try {
@@ -58,10 +58,10 @@ async function sendEmail(email, body) {
     
     const result = await response.json();
     console.log(result);
-    console.log(chalk.green('이메일을 성공적으로 보냈습니다.'));
+    console.log(chalk.green(__('email_success')));
     return result;
   } catch (error) {
-    throw new Error(`이메일 전송 중 오류가 발생했습니다: ${error.message}`);
+    throw new Error(__('email_error', { error: error.message }));
   }
 }
 
@@ -76,6 +76,6 @@ function add(a, b) {
   }
   
   const result = a + b;
-  console.log(chalk.green(`${a} + ${b} = ${result}`));
+  console.log(chalk.green(__('add_result', { a, b, result })));
   return result;
 } 

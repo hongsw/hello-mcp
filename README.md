@@ -8,12 +8,16 @@
 
 Hello-MCP is a helpful utility tool that enables Claude Desktop to interact with external tools via the Model Context Protocol (MCP). It simplifies the setup process and provides a seamless integration between Claude AI and your custom tools.
 
+(English) Hello, Welcome!
+(Korean) 안녕하세요, 환영합니다!
+
 ## 🛠️ Features
 
 - **Easy Setup**: Simple one-command setup for Claude Desktop MCP integration
 - **Multiple Modes**: Run as a setup wizard, MCP server, or CLI tool
 - **Built-in Sample Tools**: Pre-configured tools like email sending and simple calculations
 - **Extensible**: Easily add your own MCP tools
+- **Internationalization**: Supports multiple languages (Korean and English)
 
 ## 📋 Requirements
 
@@ -78,6 +82,26 @@ Available commands:
 
 Your API key is stored in `~/.garakrc` and has a daily limit of 50 requests. The key is automatically configured for use with Claude Desktop.
 
+
+
+## 🌐 Internationalization (i18n)
+
+Hello-MCP supports multiple languages through a robust internationalization architecture.
+
+**Key Features:**
+
+- **Language Files:** Separate JSON files for each language (e.g., `ko.json`, `en.json`) in the `locales/` directory.
+- **Automatic Language Detection:**
+    - Detects language based on environment variables (`LC_ALL`, `LANG`, `LANGUAGE`).
+    - Detects operating system settings (macOS, Windows).
+    - Uses language preference stored in the user configuration file (`.garakrc`).
+- **Placeholder Support:** Dynamic text insertion using placeholders (e.g., `{variable}`).
+- **Language Switching:**
+    - `npx hello-mcp lang` command to select language via a UI.
+    -  Quick language switching using environment variables (e.g., `LC_ALL=en node index.js`).
+
+
+
 ## 📊 Telemetry
 
 Hello-MCP collects anonymous usage data to improve the service:
@@ -100,6 +124,12 @@ If you encounter any issues, please contact us at help@garak.ai
 For more examples and tips, visit our guide:
 [https://garak.ai/getting-started](https://garak.ai/getting-started)
 
+## 🚧 TODO
+
+- If you encounter any problems or have suggestions, please create an issue on a suitable issue tracking system (e.g., GitHub Issues). Provide a detailed description of the issue and steps to reproduce it. https://github.com/hongsw/hello-mcp/issues
+- Windows support is currently under testing.
+
+
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
