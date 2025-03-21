@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { createRequire } from 'module';
 import { __ } from './i18n.js'; // i18n 모듈 가져오기
+import { getTroubleshootingGuide } from './utils.js'; // 문제 해결 가이드 가져오기
 
 // CommonJS 모듈 로드를 위한 require 함수 생성
 const require = createRequire(import.meta.url);
@@ -19,6 +20,9 @@ export async function executeCommand(command, args) {
       
     case 'add':
       return add(parseFloat(args[0]), parseFloat(args[1]));
+    
+    case 'troubleshoot':
+      return troubleshoot(args[0]);
       
     default:
       throw new Error(__('unknown_command', { command }));
@@ -78,4 +82,25 @@ function add(a, b) {
   const result = a + b;
   console.log(chalk.green(__('add_result', { a, b, result })));
   return result;
+}
+
+/**
+ * 문제 해결 가이드 표시
+ * @param {string} errorType - 오류 유형
+ */
+function troubleshoot(errorType) {
+  const guide = getTroubleshootingGuide(errorType);
+  
+  console.log(chalk.yellow.bold(`\n🔍 ${guide.title}`));
+  console.log(chalk.cyan(guide.description));
+  
+  console.log(chalk.yellow('\n해결 방법:'));
+  guide.steps.forEach(step => {
+    console.log(chalk.white(step));
+  });
+  
+  console.log(chalk.blue('\n추가 도움이 필요하면 help@garak.ai로 문의하세요.'));
+  console.log(chalk.blue('GitHub 이슈: https://github.com/hongsw/hello-mcp/issues\n'));
+  
+  return guide;
 } 

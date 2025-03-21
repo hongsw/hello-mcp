@@ -55,5 +55,12 @@
   "예시:": "示例:",
   "언어가 변경되었습니다.": "语言已更改。",
   "\n이제 Claude와 함께 다음을 시도해보세요:": "\n现在尝试使用Claude做以下操作:",
-  "\n\"{email} 로 \\\"1 add 1\\\" 결과를 메일보내줘.\"": "\n\"将\\\"1 add 1\\\"的结果发送邮件到{email}。\""
+  "\n\"{email} 로 \\\"1 add 1\\\" 결과를 메일보내줘.\"": "\n\"将\\\"1 add 1\\\"的结果发送邮件到{email}。\"",
+  "현재 언어: {lang}": "当前语言: {lang}",
+  "언어를 변경하시겠습니까?": "您想更改语言吗？",
+  "  troubleshoot [error-type] - 문제 해결 가이드 표시": "  troubleshoot [error-type] - 显示故障排除指南",
+  "\n문제 해결 가이드 예시:": "\n故障排除指南示例:",
+  "  npx hello-mcp cli troubleshoot claude-service-disruption": "  npx hello-mcp cli troubleshoot claude-service-disruption",
+  "  npx hello-mcp cli troubleshoot email-error": "  npx hello-mcp cli troubleshoot email-error",
+  "  npx hello-mcp cli troubleshoot website-invalid": "  npx hello-mcp cli troubleshoot website-invalid"
 } 

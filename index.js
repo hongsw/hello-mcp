@@ -61,6 +61,11 @@ async function startCliMode() {
     console.log(chalk.cyan(__('가능한 명령어:')));
     console.log(__('  send-email [email] [body] - 이메일 전송'));
     console.log(__('  add [a] [b] - 두 숫자 더하기'));
+    console.log(__('  troubleshoot [error-type] - 문제 해결 가이드 표시'));
+    console.log(chalk.cyan(__('\n문제 해결 가이드 예시:')));
+    console.log(__('  npx hello-mcp cli troubleshoot claude-service-disruption'));
+    console.log(__('  npx hello-mcp cli troubleshoot email-error'));
+    console.log(__('  npx hello-mcp cli troubleshoot website-invalid'));
     return;
   }
   
@@ -176,6 +181,43 @@ async function main() {
   // 환영 메시지 출력
   console.log(chalk.cyan.bold(__('\n✨ Hello Garak에 오신 것을 환영합니다! ✨')));
   console.log(chalk.cyan(__('AI 에이전트를 위한 도구를 쉽게 설정해 드릴게요.\n')));
+
+  // 언어 선택 옵션 제공
+  const languages = getAvailableLanguages();
+  const langNames = {
+    'ko': '한국어', 
+    'en': 'English', 
+    'ja': '日本語', 
+    'zh': '中文', 
+    'es': 'Español', 
+    'fr': 'Français', 
+    'de': 'Deutsch', 
+    'ru': 'Русский', 
+    'pt': 'Português', 
+    'it': 'Italiano', 
+    'ar': 'العربية', 
+    'hi': 'हिन्दी'
+  };
+  
+  // 언어 선택 표시
+  const currentLang = getCurrentLanguage();
+  console.log(chalk.blue(__('현재 언어: {lang}', { lang: langNames[currentLang] || currentLang })));
+  
+  const { shouldChangeLang } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'shouldChangeLang',
+      message: __('언어를 변경하시겠습니까?'),
+      default: false
+    }
+  ]);
+  
+  if (shouldChangeLang) {
+    await handleLanguageSettings();
+    // 언어가 변경된 후 환영 메시지 다시 표시
+    console.log(chalk.cyan.bold(__('\n✨ Hello Garak에 오신 것을 환영합니다! ✨')));
+    console.log(chalk.cyan(__('AI 에이전트를 위한 도구를 쉽게 설정해 드릴게요.\n')));
+  }
 
   // Claude Desktop 설치 확인
   if (!utils.isClaudeDesktopInstalled()) {

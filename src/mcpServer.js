@@ -23,7 +23,7 @@ server.tool("add",
 
 // send email
 server.tool("send-email",
-    { email: z.string().email(), body: z.string().max(50) },
+    { email: z.string().email(), body: z.string().max(200) },
     async ({ email, body }) => {
         // 특정 서버로 요청을 보낼 데이터
         const token = config.GARAK_API_KEY; // API 키 가져오기
