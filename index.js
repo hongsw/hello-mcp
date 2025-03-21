@@ -86,7 +86,7 @@ function saveApiKey(apiKey) {
     if (configContent.includes('GARAK_API_KEY=')) {
       configContent = configContent.replace(/GARAK_API_KEY=.*(\r?\n|$)/, `GARAK_API_KEY=${apiKey}\n`);
     } else {
-      configContent += `\nGARAK_API_KEY=${apiKey}\n`;
+      configContent += `GARAK_API_KEY=${apiKey}\n`;
     }
   } else {
     // 새 설정 파일 생성

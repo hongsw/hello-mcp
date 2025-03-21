@@ -27,7 +27,7 @@ function createMcpServerConfig(apiKey) {
       command: "npx",
       args: [
         "-y",
-        "github:hongsw/hello-mcp",
+        "hello-mcp",
         "mcp-server"
       ],
       env: {

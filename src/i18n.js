@@ -110,20 +110,32 @@ export function setLanguage(lang) {
   currentLanguage = lang;
   translations = loadTranslations(lang);
   
-  // 설정 파일에 언어 설정 저장
+  // 설정 파일에 언어 설정 저장 (INI 형식)
   const configPath = path.join(os.homedir(), '.garakrc');
-  let configContent = {};
+  let configContent = '';
   
   try {
     if (fs.existsSync(configPath)) {
-      configContent = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      configContent = fs.readFileSync(configPath, 'utf8');
+      
+      // language 설정이 이미 있는지 확인
+      if (configContent.includes('language=')) {
+        // 기존 language 설정 업데이트
+        configContent = configContent.replace(/language=.*(\r?\n|$)/, `language=${lang}\n`);
+      } else {
+        // language 설정 추가
+        configContent += `language=${lang}\n`;
+      }
+    } else {
+      // 새 설정 파일 생성
+      configContent = `language=${lang}\n`;
     }
   } catch (error) {
-    // 무시하고 새로운 설정 생성
+    // 오류 발생 시 새로운 설정 파일 생성
+    configContent = `language=${lang}\n`;
   }
   
-  configContent.language = lang;
-  fs.writeFileSync(configPath, JSON.stringify(configContent, null, 2));
+  fs.writeFileSync(configPath, configContent, 'utf8');
   
   return true;
 }
