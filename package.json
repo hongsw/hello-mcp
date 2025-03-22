@@ -25,7 +25,12 @@
     "deploy:patch": "git add . && git commit -m \"Patch release\" && npm version patch && npm publish",
     "deploy:minor": "git add . && git commit -m \"Minor release\" && npm version minor && npm publish",
     "deploy:major": "git add . && git commit -m \"Major release\" && npm version major && npm publish",
-    "deploy": "npm run deploy:patch"
+    "deploy": "npm run deploy:patch",
+    "docs": "docsify serve docs",
+    "docs:build": "cp GETTING_STARTED.md docs/README.md"
+  },
+  "devDependencies": {
+    "docsify-cli": "^4.4.4"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"

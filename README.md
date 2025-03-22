@@ -8,7 +8,7 @@
 [한국어 버전](https://github.com/hongsw/hello-mcp/blob/main/README.ko.md)
 
 English Version is available at the following link.
-[English Version](https://github.com/hongsw/hello-mcp/blob/main/README.md)
+[English Version](https://github.com/hongsw/hello-mcp/blob/main/README.en.md)
 
 ## ✨ Overview
 
@@ -91,8 +91,12 @@ If you encounter any issues, please contact us at help@garak.ai
 
 ## 📚 Documentation
 
-For more examples and tips, visit our guide:
-[https://garak.ai/getting-started](https://garak.ai/getting-started)
+For more examples and tips, visit our getting started guide:
+[Getting Started Guide](GETTING_STARTED.md)
+
+You can also browse our interactive documentation:
+- Run locally: `npx docsify-cli serve docs`
+- View in your browser: http://localhost:3000
 
 ## 🚧 TODO
 
