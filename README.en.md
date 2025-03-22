@@ -4,18 +4,9 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14-brightgreen.svg)](https://nodejs.org/en/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-한국어 버전은 아래 링크에서 확인할 수 있습니다.
-[한국어 버전](https://github.com/hongsw/hello-mcp/blob/main/README.ko.md)
-
-English Version is available at the following link.
-[English Version](https://github.com/hongsw/hello-mcp/blob/main/README.md)
-
 ## ✨ Overview
 
 Hello-MCP is a helpful utility tool that enables Claude Desktop to interact with external tools via the Model Context Protocol (MCP). It simplifies the setup process and provides a seamless integration between Claude AI and your custom tools.
-
-(English) Hello, Welcome!
-(Korean) 안녕하세요, 환영합니다!
 
 ## 🛠️ Features
 
@@ -73,7 +64,7 @@ This will start the setup wizard that guides you through the entire configuratio
 
 ## 🎮 Usage
 
-Hi-Garak can be used in three different modes:
+Hello-MCP can be used in three different modes:
 
 ### 1️⃣ Setup Mode (Default)
 
@@ -155,31 +146,31 @@ If you encounter any issues, please contact us at help@garak.ai
 
 ### Common Issues
 
-#### Claude Desktop 서비스 중단 메시지
-Claude Desktop에서 "Claude will return Soon, Claude ai is currently experiencing a temporary service disruption" 오류가 발생하는 경우:
-1. Claude Desktop 앱을 완전히 종료한 후 다시 시작해보세요.
-2. 인터넷 연결 상태를 확인하세요.
-3. [Anthropic 서비스 상태](https://status.anthropic.com/) 페이지를 확인하세요.
-4. 문제가 지속되면 몇 시간 후에 다시 시도해보세요. 서비스 제공자의 일시적인 문제일 수 있습니다.
+#### Claude Desktop Service Disruption Message
+If you see "Claude will return Soon, Claude AI is currently experiencing a temporary service disruption" error in Claude Desktop:
+1. Completely close the Claude Desktop app and restart it.
+2. Check your internet connection.
+3. Check the [Anthropic service status](https://status.anthropic.com/) page.
+4. If the problem persists, try again in a few hours. It might be a temporary issue with the service provider.
 
-#### 웹사이트 접속 오류
-웹사이트에 접속할 수 없는 경우:
-1. 인터넷 연결 상태를 확인하세요.
-2. 브라우저 캐시를 삭제한 후 다시 시도해보세요.
-3. 다른 브라우저를 사용해보세요.
-4. 아래 주소로 직접 접속해보세요: https://garak.ai/getting-started
+#### Website Access Errors
+If you cannot access the website:
+1. Check your internet connection.
+2. Clear your browser cache and try again.
+3. Try using a different browser.
+4. Try accessing the direct URL: https://garak.ai/getting-started
 
-#### 이메일 전송 오류
-이메일 전송 중 오류가 발생하는 경우:
-1. 이메일 주소가 올바른지 확인하세요.
-2. API 키가 유효한지 확인하세요. `npx hello-mcp` 명령어로 새 API 키를 발급받을 수 있습니다.
-3. 메시지 본문이 너무 길면(200자 이상) 분할하여 전송해보세요.
+#### Email Sending Errors
+If you encounter errors when sending emails:
+1. Verify that the email address is correct.
+2. Ensure your API key is valid. You can get a new API key with the `npx hello-mcp` command.
+3. If your message body is too long (over 200 characters), try splitting it into smaller messages.
 
-#### Windows에서 asdf 관련 오류
-Windows에서는 asdf 대신 Node.js 공식 웹사이트에서 설치 파일을 다운로드하여 설치하세요:
-1. [Node.js 공식 다운로드 페이지](https://nodejs.org/en/download/)를 방문합니다.
-2. Windows Installer(.msi)를 다운로드합니다.
-3. 설치 마법사를 따라 설치를 완료합니다.
+#### Windows asdf-related Errors
+On Windows, instead of using asdf, download and install Node.js directly from the official website:
+1. Visit the [Node.js official download page](https://nodejs.org/en/download/).
+2. Download the Windows Installer (.msi).
+3. Complete the installation by following the installation wizard.
 
 ## 📚 Documentation
 
@@ -188,9 +179,9 @@ For more examples and tips, visit our guide:
 
 ## 🚧 TODO
 
-- If you encounter any problems or have suggestions, please create an issue on a suitable issue tracking system (e.g., GitHub Issues). Provide a detailed description of the issue and steps to reproduce it. https://github.com/hongsw/hello-mcp/issues
+- If you encounter any problems or have suggestions, please create an issue on GitHub Issues. Provide a detailed description of the issue and steps to reproduce it. https://github.com/hongsw/hello-mcp/issues
 - Windows support is currently under testing.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details. 
