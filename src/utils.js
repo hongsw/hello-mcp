@@ -3,29 +3,45 @@ import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { time } from 'console';
+import { checkProgramInstallation } from './programLocator.js';
 
 // Claude Desktop이 설치되어 있는지 확인
 function isClaudeDesktopInstalled() {
-  const platform = process.platform;
-  let claudePath = '';
+  const result = checkProgramInstallation('Claude');
   
-  if (platform === 'darwin') { // macOS
-    claudePath = '/Applications/Claude.app';
-  } else if (platform === 'win32') { // Windows
-    const programFiles = process.env['ProgramFiles'] || 'C:\\Program Files';
-    claudePath = path.join(programFiles, 'Claude', 'Claude.exe');
-    const programFilesX86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
-    const alternativePath = path.join(programFilesX86, 'Claude', 'Claude.exe');
+  if (result.error) {
+    console.log(`프로그램 확인 중 오류 발생: ${result.error}`);
+    return false;
+  }
+
+  if (!result.installed) {
+    const platform = process.platform;
+    console.log('\n[Claude Desktop 설치 확인]');
+    console.log('- 상태: 설치되지 않음');
+    console.log('- 운영체제:', platform === 'win32' ? 'Windows' : platform === 'darwin' ? 'macOS' : '기타');
     
-    if (fs.existsSync(alternativePath)) {
-      return true;
+    if (platform === 'win32') {
+      console.log('\n일반적인 설치 경로:');
+      console.log('- C:\\Program Files\\Claude\\Claude.exe');
+      console.log('- C:\\Program Files (x86)\\Claude\\Claude.exe');
+    } else if (platform === 'darwin') {
+      console.log('\n일반적인 설치 경로:');
+      console.log('- /Applications/Claude.app');
+      console.log(`- ${os.homedir()}/Applications/Claude.app`);
     }
-  } else { // Linux
-    const homedir = os.homedir();
-    claudePath = path.join(homedir, '.local', 'share', 'Claude', 'Claude');
+    
+    console.log('\n다운로드: https://claude.ai/download');
+    return false;
+  }
+
+  console.log('\n[Claude Desktop 설치 확인]');
+  console.log('- 상태: 설치됨');
+  console.log(`- 설치 위치: ${result.location}`);
+  if (result.version) {
+    console.log(`- 버전: ${result.version}`);
   }
   
-  return fs.existsSync(claudePath);
+  return true;
 }
 
 // Claude Desktop 재시작
