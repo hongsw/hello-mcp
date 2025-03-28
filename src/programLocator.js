@@ -276,7 +276,7 @@ export function detectShellEnvironment() {
 const SHELL_COMMANDS = {
   windows: {
     mingw: {
-      kill: (processName) => `taskkill //F //IM "${processName}" 2>/dev/null`,
+      kill: (processName) => `winpty powershell.exe -Command \"Stop-Process -Name "${processName}" -Force -ErrorAction SilentlyContinue\"`,
       start: (exePath) => `start C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe`,
       list: 'tasklist | grep -i "claude"'
     },
