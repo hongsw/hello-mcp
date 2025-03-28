@@ -186,6 +186,80 @@ export function checkProgramInstallation(programName) {
 }
 
 /**
+ * Windows 환경 감지
+ * @returns {string} - 'mingw' | 'powershell' | 'cmd' | 'unknown'
+ */
+function detectWindowsEnv() {
+  try {
+    // MINGW 환경 확인
+    if (process.env.MSYSTEM) {
+      return 'mingw';
+    }
+
+    // PowerShell 환경 확인
+    try {
+      execSync('powershell $PSVersionTable', { stdio: 'pipe' });
+      return 'powershell';
+    } catch {
+      // PowerShell 명령이 실패하면 CMD로 가정
+      return 'cmd';
+    }
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Windows에서 프로세스 종료
+ * @param {string} env - Windows 환경 ('mingw' | 'powershell' | 'cmd')
+ * @returns {boolean} - 성공 여부
+ */
+function killWindowsProcess(env) {
+  try {
+    const commands = {
+      mingw: 'taskkill //F //IM "claude.exe" 2>/dev/null || taskkill //F //IM "Claude.exe" 2>/dev/null',
+      powershell: 'Stop-Process -Name "claude" -Force -ErrorAction SilentlyContinue; Stop-Process -Name "Claude" -Force -ErrorAction SilentlyContinue',
+      cmd: 'taskkill /F /IM "claude.exe" 2>nul || taskkill /F /IM "Claude.exe" 2>nul'
+    };
+
+    const command = commands[env] || commands.cmd;
+    
+    if (env === 'powershell') {
+      execSync(`powershell -Command "${command}"`, { stdio: 'pipe' });
+    } else {
+      execSync(command, { stdio: 'pipe' });
+    }
+    
+    console.log('프로세스 종료 성공 (환경:', env, ')');
+    return true;
+  } catch (error) {
+    console.log('프로세스 종료 시도 중 오류 (이미 종료되었을 수 있음):', error.message);
+    return false;
+  }
+}
+
+/**
+ * Windows에서 프로세스 시작
+ * @param {string} env - Windows 환경
+ * @param {string} exePath - 실행 파일 경로
+ */
+function startWindowsProcess(env, exePath) {
+  const commands = {
+    mingw: `start "" "${exePath.replace(/\\/g, '/')}"`,
+    powershell: `Start-Process "${exePath}"`,
+    cmd: `start "" "${exePath}"`
+  };
+
+  const command = commands[env] || commands.cmd;
+  
+  if (env === 'powershell') {
+    execSync(`powershell -Command "${command}"`, { stdio: 'pipe' });
+  } else {
+    execSync(command, { stdio: 'pipe' });
+  }
+}
+
+/**
  * Claude Desktop 프로그램 재시작
  * @returns {object} - 재시작 성공 여부와 메시지
  */
@@ -208,30 +282,25 @@ export async function restartClaudeDesktop() {
 
   try {
     if (platform === 'win32') {
+      const windowsEnv = detectWindowsEnv();
+      console.log('감지된 Windows 환경:', windowsEnv);
+
       // Windows에서 프로세스 종료
-      try {
-        // 대소문자 구분 없이 모든 가능한 프로세스 종료 시도
-        execSync('taskkill /F /IM "claude.exe" 2>nul || taskkill /F /IM "Claude.exe" 2>nul', { stdio: 'pipe' });
-        console.log('프로세스 종료 성공');
-      } catch (error) {
-        console.log('프로세스 종료 시도 중 오류 (이미 종료되었을 수 있음):', error.message);
-      }
+      killWindowsProcess(windowsEnv);
       
       // 잠시 대기 후 재시작
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Claude 재시작 - 정확한 실행 파일 이름 사용
-      const exeName = path.basename(claudeInfo.location);
+      // Claude 재시작
       console.log('재시작 시도:', claudeInfo.location);
-      
-      execSync(`start "" "${claudeInfo.location}"`, { stdio: 'pipe' });
+      startWindowsProcess(windowsEnv, claudeInfo.location);
       
       return {
         success: true,
         message: 'Claude Desktop이 성공적으로 재시작되었습니다.',
         debug: {
-          exePath: claudeInfo.location,
-          exeName
+          environment: windowsEnv,
+          exePath: claudeInfo.location
         }
       };
       
