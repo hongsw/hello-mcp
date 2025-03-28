@@ -22,8 +22,7 @@ function isClaudeDesktopInstalled() {
     
     if (platform === 'win32') {
       console.log('\n일반적인 설치 경로:');
-      console.log('- C:\\Program Files\\Claude\\Claude.exe');
-      console.log('- C:\\Program Files (x86)\\Claude\\Claude.exe');
+      console.log(`- ${os.homedir()}\\AppData\\Local\\AnthropicClaude\\claude.exe`);
     } else if (platform === 'darwin') {
       console.log('\n일반적인 설치 경로:');
       console.log('- /Applications/Claude.app');

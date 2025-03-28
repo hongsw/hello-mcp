@@ -22,8 +22,7 @@ export function checkWindowsProgram(programName) {
   // Claude의 일반적인 설치 경로 확인
   if (programName === 'Claude') {
     const possiblePaths = [
-      path.join(process.env['ProgramFiles'] || 'C:\\Program Files', 'Claude', 'Claude.exe'),
-      path.join(process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)', 'Claude', 'Claude.exe')
+      path.join(os.homedir(), 'AppData', 'Local', 'AnthropicClaude', 'claude.exe')
     ];
 
     for (const claudePath of possiblePaths) {
