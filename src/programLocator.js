@@ -277,17 +277,17 @@ const SHELL_COMMANDS = {
   windows: {
     mingw: {
       kill: (processName) => `taskkill //F //IM "${processName}" 2>/dev/null`,
-      start: (exePath) => `start "" "${exePath.replace(/\\/g, '/')}"`,
+      start: (exePath) => `start "${exePath}"`,
       list: 'tasklist | grep -i "claude"'
     },
     powershell: {
       kill: (processName) => `Stop-Process -Name "${processName}" -Force -ErrorAction SilentlyContinue`,
-      start: (exePath) => `Start-Process "${exePath}"`,
+      start: (exePath) => `Start-Process -FilePath "${exePath}"`,
       list: 'Get-Process | Where-Object { $_.Name -like "*claude*" } | Select-Object Name, Id'
     },
     cmd: {
       kill: (processName) => `taskkill /F /IM "${processName}" 2>nul`,
-      start: (exePath) => `start "" "${exePath}"`,
+      start: (exePath) => `start "${exePath}"`,
       list: 'tasklist | findstr /i "claude"'
     }
   },
