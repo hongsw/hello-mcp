@@ -406,8 +406,18 @@ export async function restartClaudeDesktop() {
     } else if (result.platform === 'darwin') {
       // macOS 처리
       try {
-        const command = 'pkill -f "Claude" && sleep 1.5 && open -a Claude';
-        spawn(command, { stdio: 'pipe' });
+        // 프로세스 종료
+        execSync('pkill -f "Claude"', { stdio: 'pipe' });
+        
+        // 잠시 대기
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // 프로세스 시작
+        spawn('open', ['-a', 'Claude'], {
+          detached: true,
+          stdio: 'ignore'
+        }).unref();
+        
         result.success = true;
         result.message = 'Claude Desktop이 성공적으로 재시작되었습니다.';
       } catch (error) {
