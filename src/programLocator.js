@@ -382,21 +382,23 @@ export async function restartClaudeDesktop() {
       // Windows에서 프로세스 종료
       try {
         const killCmd = result.commands.kill('claude.exe');
-        console.log('프로세스 종료 시도:', killCmd);
         execSync(killCmd, { stdio: 'pipe' });
       } catch (error) {
-        console.log('프로세스 종료 중 오류 (무시됨):', error.message);
+        // 프로세스 종료 중 오류는 무시
       }
 
       // 잠시 대기
-      console.log('2초 대기 중...');
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // 프로세스 시작
       try {
-        const startCmd = result.commands.start(result.claudeInfo.location);
-        console.log('프로세스 시작 시도:', startCmd);
-        spawn(startCmd, { stdio: 'pipe' });
+        const claudePath = `C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe`;
+        spawn(claudePath, [], {
+          detached: true,
+          stdio: 'ignore',
+          shell: true
+        }).unref();
+        
         result.success = true;
         result.message = 'Claude Desktop이 성공적으로 재시작되었습니다.';
       } catch (error) {
