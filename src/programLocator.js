@@ -183,4 +183,72 @@ export function checkProgramInstallation(programName) {
       error: error.message
     };
   }
+}
+
+/**
+ * Claude Desktop 프로그램 재시작
+ * @returns {object} - 재시작 성공 여부와 메시지
+ */
+export async function restartClaudeDesktop() {
+  const platform = os.platform();
+  const claudeInfo = checkProgramInstallation('Claude');
+  
+  if (!claudeInfo.installed) {
+    return {
+      success: false,
+      message: 'Claude Desktop이 설치되어 있지 않습니다.'
+    };
+  }
+
+  try {
+    if (platform === 'win32') {
+      // Windows에서 프로세스 종료
+      try {
+        execSync('taskkill /F /IM claude.exe', { stdio: 'ignore' });
+      } catch (error) {
+        // 프로세스가 이미 종료된 경우 무시
+      }
+      
+      // 잠시 대기 후 재시작
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Claude 재시작
+      execSync(`start "" "${claudeInfo.location}"`, { stdio: 'ignore' });
+      
+      return {
+        success: true,
+        message: 'Claude Desktop이 성공적으로 재시작되었습니다.'
+      };
+      
+    } else if (platform === 'darwin') {
+      // macOS에서 프로세스 종료 및 재시작
+      try {
+        execSync('pkill -f "Claude"', { stdio: 'ignore' });
+      } catch (error) {
+        // 프로세스가 이미 종료된 경우 무시
+      }
+      
+      // 잠시 대기 후 재시작
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Claude 재시작
+      execSync('open -a Claude', { stdio: 'ignore' });
+      
+      return {
+        success: true,
+        message: 'Claude Desktop이 성공적으로 재시작되었습니다.'
+      };
+    }
+    
+    return {
+      success: false,
+      message: '지원되지 않는 운영체제입니다.'
+    };
+    
+  } catch (error) {
+    return {
+      success: false,
+      message: `재시작 중 오류가 발생했습니다: ${error.message}`
+    };
+  }
 } 
