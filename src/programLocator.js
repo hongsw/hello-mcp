@@ -266,7 +266,7 @@ export function detectShellEnvironment() {
     console.error('쉘 환경 감지 중 오류 발생:', error);
   }
 
-  console.log('감지된 쉘 환경:', result);
+  // console.log('감지된 쉘 환경:', result);
   return result;
 }
 
@@ -347,7 +347,7 @@ export async function initialize() {
     };
   }
 
-  console.log('초기화 결과:', result);
+  // console.log('초기화 결과:', result);
   return result;
 }
 
