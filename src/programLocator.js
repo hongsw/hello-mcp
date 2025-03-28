@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
@@ -376,7 +376,7 @@ export async function restartClaudeDesktop() {
     result.claudeInfo = initResult.claudeInfo;
     result.commands = initResult.commands;
 
-    console.log('재시작 시작 - 환경:', result.shellEnvironment);
+    // console.log('재시작 시작 - 환경:', result.shellEnvironment);
 
     if (result.platform === 'win32') {
       // Windows에서 프로세스 종료
@@ -390,13 +390,13 @@ export async function restartClaudeDesktop() {
 
       // 잠시 대기
       console.log('2초 대기 중...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // 프로세스 시작
       try {
         const startCmd = result.commands.start(result.claudeInfo.location);
         console.log('프로세스 시작 시도:', startCmd);
-        execSync(startCmd, { stdio: 'pipe' });
+        spawn(startCmd, { stdio: 'pipe' });
         result.success = true;
         result.message = 'Claude Desktop이 성공적으로 재시작되었습니다.';
       } catch (error) {
@@ -405,7 +405,15 @@ export async function restartClaudeDesktop() {
 
     } else if (result.platform === 'darwin') {
       // macOS 처리
-      // ... existing macOS code ...
+      try {
+        const command = 'pkill -f "Claude" && sleep 1.5 && open -a Claude';
+        spawn(command, { stdio: 'pipe' });
+        result.success = true;
+        result.message = 'Claude Desktop이 성공적으로 재시작되었습니다.';
+      } catch (error) {
+        throw new Error(`프로세스 시작 실패: ${error.message}`);
+      }
+
     }
 
   } catch (error) {
@@ -417,6 +425,6 @@ export async function restartClaudeDesktop() {
     };
   }
 
-  console.log('최종 재시작 결과:', result);
+  // console.log('최종 재시작 결과:', result);
   return result;
 } 
