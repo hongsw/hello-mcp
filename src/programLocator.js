@@ -277,17 +277,17 @@ const SHELL_COMMANDS = {
   windows: {
     mingw: {
       kill: (processName) => `winpty powershell.exe -Command \"Stop-Process -Name Claude -Force -ErrorAction SilentlyContinue\"`,
-      start: (exePath) => `start C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe`,
+      start: (exePath) => `start /B C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe`,
       list: 'tasklist | grep -i "claude"'
     },
     powershell: {
       kill: (processName) => `Stop-Process -Name Claude -Force -ErrorAction SilentlyContinue`,
-      start: (exePath) => `Start-Process "C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe"`,
+      start: (exePath) => `Start-Process -WindowStyle Hidden "C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe"`,
       list: 'Get-Process | Where-Object { $_.Name -like "*claude*" } | Select-Object Name, Id'
     },
     cmd: {
       kill: (processName) => `taskkill /F /IM Claude.exe`,
-      start: (exePath) => `start C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe`,
+      start: (exePath) => `start /B C:/Users/${os.userInfo().username}/AppData/Local/AnthropicClaude/claude.exe`,
       list: 'tasklist | findstr /i "claude"'
     }
   },
