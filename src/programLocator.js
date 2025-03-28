@@ -186,179 +186,169 @@ export function checkProgramInstallation(programName) {
 }
 
 /**
- * Windows 환경 감지
- * @returns {object} - 환경 정보
+ * 현재 실행 환경의 쉘 정보를 감지
+ * @returns {object} - 쉘 환경 정보
  */
-function detectWindowsEnv() {
+export function detectShellEnvironment() {
   const result = {
-    type: 'unknown',
+    platform: os.platform(),
     shell: process.env.SHELL || 'unknown',
-    term: process.env.TERM || 'unknown',
-    msystem: process.env.MSYSTEM || 'none',
-    debug: {}
+    type: 'unknown',
+    debug: {
+      env: {
+        SHELL: process.env.SHELL,
+        TERM: process.env.TERM,
+        MSYSTEM: process.env.MSYSTEM,
+        ComSpec: process.env.ComSpec,
+        PSModulePath: process.env.PSModulePath
+      },
+      path: process.env.PATH,
+      cwd: process.cwd(),
+      home: os.homedir()
+    }
   };
 
   try {
-    // MINGW 환경 확인
-    if (process.env.MSYSTEM) {
-      result.type = 'mingw';
-      result.debug.msystem = process.env.MSYSTEM;
-    }
-
-    // PowerShell 환경 확인
-    try {
-      const psOutput = execSync('powershell $PSVersionTable', { stdio: 'pipe' }).toString();
-      result.type = 'powershell';
-      result.debug.powershell = psOutput;
-    } catch (error) {
-      result.debug.powershellError = error.message;
-      // PowerShell 명령이 실패하면 CMD로 가정
-      result.type = 'cmd';
+    if (result.platform === 'win32') {
+      // Windows 환경 감지
+      if (process.env.MSYSTEM) {
+        // MINGW (Git Bash) 환경
+        result.type = 'mingw';
+        result.debug.msystem = process.env.MSYSTEM;
+        console.log('MINGW(Git Bash) 환경이 감지되었습니다.');
+      } else {
+        // PowerShell 또는 CMD 감지
+        try {
+          execSync('powershell $PSVersionTable', { stdio: 'pipe' });
+          result.type = 'powershell';
+          console.log('PowerShell 환경이 감지되었습니다.');
+        } catch (error) {
+          if (process.env.ComSpec && process.env.ComSpec.toLowerCase().includes('cmd.exe')) {
+            result.type = 'cmd';
+            console.log('CMD 환경이 감지되었습니다.');
+          } else {
+            console.log('알 수 없는 Windows 환경입니다.');
+          }
+        }
+      }
+    } else if (result.platform === 'darwin') {
+      // macOS 쉘 환경 감지
+      const shell = process.env.SHELL || '';
+      if (shell.includes('bash')) {
+        result.type = 'bash';
+        console.log('Bash 환경이 감지되었습니다.');
+      } else if (shell.includes('zsh')) {
+        result.type = 'zsh';
+        console.log('Zsh 환경이 감지되었습니다.');
+      } else {
+        result.type = 'unix';
+        console.log('기타 Unix 쉘 환경이 감지되었습니다.');
+      }
     }
 
     // 추가 환경 정보 수집
     try {
-      result.debug.path = process.env.PATH;
-      result.debug.pwd = process.cwd();
-      result.debug.home = os.homedir();
+      if (result.platform === 'win32') {
+        if (result.type === 'powershell') {
+          result.debug.shellVersion = execSync('powershell $PSVersionTable.PSVersion', { stdio: 'pipe' }).toString();
+        } else if (result.type === 'cmd') {
+          result.debug.shellVersion = execSync('cmd /c ver', { stdio: 'pipe' }).toString();
+        }
+      } else {
+        result.debug.shellVersion = execSync('echo $SHELL_VERSION', { stdio: 'pipe' }).toString();
+      }
     } catch (error) {
-      result.debug.envError = error.message;
+      result.debug.shellVersionError = error.message;
     }
 
   } catch (error) {
-    result.debug.error = error.message;
+    result.error = error.message;
+    console.error('쉘 환경 감지 중 오류 발생:', error);
   }
 
-  console.log('감지된 Windows 환경:', result);
+  console.log('감지된 쉘 환경:', result);
   return result;
 }
 
 /**
- * Windows에서 프로세스 종료
- * @param {object} env - Windows 환경 정보
- * @returns {object} - 실행 결과
+ * 쉘 환경에 따른 명령어 매핑
  */
-function killWindowsProcess(env) {
-  const result = {
-    success: false,
-    commands: [],
-    outputs: [],
-    errors: []
-  };
-
-  try {
-    const commands = {
-      mingw: [
-        'taskkill //F //IM "claude.exe" 2>/dev/null',
-        'taskkill //F //IM "Claude.exe" 2>/dev/null',
-        'taskkill //F //IM "AnthropicClaude.exe" 2>/dev/null'
-      ],
-      powershell: [
-        'Stop-Process -Name "claude" -Force -ErrorAction SilentlyContinue',
-        'Stop-Process -Name "Claude" -Force -ErrorAction SilentlyContinue',
-        'Stop-Process -Name "AnthropicClaude" -Force -ErrorAction SilentlyContinue'
-      ],
-      cmd: [
-        'taskkill /F /IM "claude.exe" 2>nul',
-        'taskkill /F /IM "Claude.exe" 2>nul',
-        'taskkill /F /IM "AnthropicClaude.exe" 2>nul'
-      ]
-    };
-
-    const commandList = commands[env.type] || commands.cmd;
-    
-    for (const cmd of commandList) {
-      try {
-        result.commands.push(cmd);
-        if (env.type === 'powershell') {
-          const output = execSync(`powershell -Command "${cmd}"`, { stdio: 'pipe' }).toString();
-          result.outputs.push(output);
-        } else {
-          const output = execSync(cmd, { stdio: 'pipe' }).toString();
-          result.outputs.push(output);
-        }
-        result.success = true;
-      } catch (error) {
-        result.errors.push(error.message);
-      }
+const SHELL_COMMANDS = {
+  windows: {
+    mingw: {
+      kill: (processName) => `taskkill //F //IM "${processName}" 2>/dev/null`,
+      start: (exePath) => `start "" "${exePath.replace(/\\/g, '/')}"`,
+      list: 'tasklist | grep -i "claude"'
+    },
+    powershell: {
+      kill: (processName) => `Stop-Process -Name "${processName}" -Force -ErrorAction SilentlyContinue`,
+      start: (exePath) => `Start-Process "${exePath}"`,
+      list: 'Get-Process | Where-Object { $_.Name -like "*claude*" } | Select-Object Name, Id'
+    },
+    cmd: {
+      kill: (processName) => `taskkill /F /IM "${processName}" 2>nul`,
+      start: (exePath) => `start "" "${exePath}"`,
+      list: 'tasklist | findstr /i "claude"'
     }
-
-    // 프로세스 목록 확인
-    try {
-      if (env.type === 'powershell') {
-        const processes = execSync('powershell -Command "Get-Process | Where-Object { $_.Name -like \'*claude*\' } | Select-Object Name, Id"', { stdio: 'pipe' }).toString();
-        result.runningProcesses = processes;
-      } else {
-        const processes = execSync('tasklist | findstr /i "claude"', { stdio: 'pipe' }).toString();
-        result.runningProcesses = processes;
-      }
-    } catch (error) {
-      result.processListError = error.message;
+  },
+  darwin: {
+    all: {
+      kill: (bundleId) => `pkill -f "${bundleId}"`,
+      start: (appPath) => `open "${appPath}"`,
+      list: 'ps aux | grep -i "Claude.app"'
     }
-
-    console.log('프로세스 종료 결과:', result);
-    return result;
-  } catch (error) {
-    result.errors.push(error.message);
-    console.log('프로세스 종료 오류:', result);
-    return result;
   }
-}
+};
 
 /**
- * Windows에서 프로세스 시작
- * @param {object} env - Windows 환경 정보
- * @param {string} exePath - 실행 파일 경로
- * @returns {object} - 실행 결과
+ * 초기화 및 환경 설정
+ * @returns {object} - 초기화 결과
  */
-function startWindowsProcess(env, exePath) {
+export async function initialize() {
   const result = {
     success: false,
-    command: '',
-    output: '',
-    error: null
+    shellEnvironment: null,
+    claudeInfo: null
   };
 
   try {
-    const commands = {
-      mingw: `start "" "${exePath.replace(/\\/g, '/')}"`,
-      powershell: `Start-Process "${exePath}"`,
-      cmd: `start "" "${exePath}"`
-    };
-
-    const command = commands[env.type] || commands.cmd;
-    result.command = command;
+    // 1. 쉘 환경 감지
+    console.log('쉘 환경 감지 중...');
+    result.shellEnvironment = detectShellEnvironment();
     
-    if (env.type === 'powershell') {
-      result.output = execSync(`powershell -Command "${command}"`, { stdio: 'pipe' }).toString();
-    } else {
-      result.output = execSync(command, { stdio: 'pipe' }).toString();
+    // 2. Claude 설치 확인
+    console.log('Claude Desktop 설치 확인 중...');
+    result.claudeInfo = checkProgramInstallation('Claude');
+    
+    if (!result.claudeInfo.installed) {
+      result.message = 'Claude Desktop이 설치되어 있지 않습니다.';
+      return result;
     }
-    
+
+    // 3. 명령어 세트 설정
+    const platform = os.platform();
+    if (platform === 'win32') {
+      result.commands = SHELL_COMMANDS.windows[result.shellEnvironment.type] || SHELL_COMMANDS.windows.cmd;
+    } else if (platform === 'darwin') {
+      result.commands = SHELL_COMMANDS.darwin.all;
+    } else {
+      throw new Error('지원되지 않는 운영체제입니다.');
+    }
+
     result.success = true;
-
-    // 프로세스 시작 확인
-    setTimeout(() => {
-      try {
-        if (env.type === 'powershell') {
-          const processes = execSync('powershell -Command "Get-Process | Where-Object { $_.Name -like \'*claude*\' } | Select-Object Name, Id"', { stdio: 'pipe' }).toString();
-          result.runningProcesses = processes;
-        } else {
-          const processes = execSync('tasklist | findstr /i "claude"', { stdio: 'pipe' }).toString();
-          result.runningProcesses = processes;
-        }
-      } catch (error) {
-        result.processCheckError = error.message;
-      }
-    }, 1000);
-
-    console.log('프로세스 시작 결과:', result);
-    return result;
+    result.message = '초기화가 완료되었습니다.';
+    
   } catch (error) {
-    result.error = error.message;
-    console.log('프로세스 시작 오류:', result);
-    return result;
+    result.success = false;
+    result.message = `초기화 중 오류가 발생했습니다: ${error.message}`;
+    result.error = {
+      message: error.message,
+      stack: error.stack
+    };
   }
+
+  console.log('초기화 결과:', result);
+  return result;
 }
 
 /**
@@ -368,58 +358,56 @@ function startWindowsProcess(env, exePath) {
 export async function restartClaudeDesktop() {
   const result = {
     success: false,
-    platform: os.platform(),
-    debug: {
-      env: process.env,
-      cwd: process.cwd(),
-      home: os.homedir()
-    }
+    platform: os.platform()
   };
 
   try {
-    console.log('재시작 시작 - 플랫폼:', result.platform);
-    
-    const claudeInfo = checkProgramInstallation('Claude');
-    result.claudeInfo = claudeInfo;
-    
-    if (!claudeInfo.installed) {
-      result.message = 'Claude Desktop이 설치되어 있지 않습니다.';
-      console.log('설치 확인 실패:', result);
-      return result;
+    // 초기화 및 환경 설정
+    const initResult = await initialize();
+    if (!initResult.success) {
+      return {
+        ...result,
+        message: initResult.message,
+        error: initResult.error
+      };
     }
+
+    result.shellEnvironment = initResult.shellEnvironment;
+    result.claudeInfo = initResult.claudeInfo;
+    result.commands = initResult.commands;
+
+    console.log('재시작 시작 - 환경:', result.shellEnvironment);
 
     if (result.platform === 'win32') {
-      const windowsEnv = detectWindowsEnv();
-      result.windowsEnv = windowsEnv;
-      console.log('Windows 환경 감지됨:', windowsEnv);
-
       // Windows에서 프로세스 종료
-      const killResult = killWindowsProcess(windowsEnv);
-      result.killResult = killResult;
-      
-      // 잠시 대기 후 재시작
+      try {
+        const killCmd = result.commands.kill('claude.exe');
+        console.log('프로세스 종료 시도:', killCmd);
+        execSync(killCmd, { stdio: 'pipe' });
+      } catch (error) {
+        console.log('프로세스 종료 중 오류 (무시됨):', error.message);
+      }
+
+      // 잠시 대기
       console.log('2초 대기 중...');
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Claude 재시작
-      console.log('재시작 시도:', claudeInfo.location);
-      const startResult = startWindowsProcess(windowsEnv, claudeInfo.location);
-      result.startResult = startResult;
-      
-      if (startResult.success) {
+
+      // 프로세스 시작
+      try {
+        const startCmd = result.commands.start(result.claudeInfo.location);
+        console.log('프로세스 시작 시도:', startCmd);
+        execSync(startCmd, { stdio: 'pipe' });
         result.success = true;
         result.message = 'Claude Desktop이 성공적으로 재시작되었습니다.';
-      } else {
-        result.message = `재시작 실패: ${startResult.error}`;
+      } catch (error) {
+        throw new Error(`프로세스 시작 실패: ${error.message}`);
       }
-      
+
     } else if (result.platform === 'darwin') {
-      // macOS 처리 코드는 그대로 유지
+      // macOS 처리
       // ... existing macOS code ...
-    } else {
-      result.message = '지원되지 않는 운영체제입니다.';
     }
-    
+
   } catch (error) {
     result.success = false;
     result.message = `재시작 중 오류가 발생했습니다: ${error.message}`;
