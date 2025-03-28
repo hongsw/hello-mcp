@@ -50,6 +50,7 @@ function restartClaudeDesktop() {
     let command = '';
     
     
+    
     if (process.platform === 'darwin') { // macOS
       command = 'pkill -f "Claude" && sleep 1.5 && open -a Claude';
     } else if (process.platform === 'win32') { // Windows
@@ -61,6 +62,7 @@ function restartClaudeDesktop() {
     }
     
     console.log('Restarting Claude Desktop...');
+    console.log('process.platform:', process.platform);
     exec(command, (error) => {
       if (error) {
         // 실행 중인 Claude가 없는 경우 - 오류가 아님

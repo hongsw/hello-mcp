@@ -10,6 +10,7 @@ import { createRequire } from 'module';
 import { setupClaudeConfig } from './src/claudeConfig.js';
 import rc from "rc";
 import { __, setLanguage, getCurrentLanguage, getAvailableLanguages } from './src/i18n.js';
+import { restartClaudeDesktop } from './src/programLocator.js';
 
 
 // 모듈 경로 설정
@@ -345,8 +346,8 @@ async function main() {
     
     // Claude Desktop 재시작 시도
     try {
-      const restarted = await utils.restartClaudeDesktop();
-      if (restarted) {
+      const restarted = await restartClaudeDesktop();
+      if (restarted.success) {
         console.log(__('✅ Claude Desktop이 재시작되었습니다'));
       } else {
         console.log(chalk.yellow(__('⚠️ Claude Desktop을 자동으로 재시작할 수 없습니다. 직접 재시작해주세요.')));
