@@ -158,7 +158,7 @@ If you cannot access the website:
 1. Check your internet connection.
 2. Clear your browser cache and try again.
 3. Try using a different browser.
-4. Try accessing the direct URL: https://garak.ai/getting-started
+4. Try accessing the direct URL: https://garak.im/getting-started
 
 #### Email Sending Errors
 If you encounter errors when sending emails:
@@ -175,7 +175,7 @@ On Windows, instead of using asdf, download and install Node.js directly from th
 ## 📚 Documentation
 
 For more examples and tips, visit our guide:
-[https://garak.ai/getting-started](https://garak.ai/getting-started)
+[https://garak.im/getting-started](https://garak.im/getting-started)
 
 ## 🚧 TODO
 

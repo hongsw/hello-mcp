@@ -77,7 +77,7 @@
   "\n이제 Claude와 함께 다음을 시도해보세요:": "\nNow try this with Claude:",
   "\n\"{email} 로 \\\"1 add 1\\\" 결과를 메일보내줘.\"": "\n\"Send the result of \\\"1 add 1\\\" to {email}.\"",
   "\n더 많은 예제와 팁을 보려면 브라우저에서 가이드를 확인하세요:": "\nCheck out the guide in your browser for more examples and tips:",
-  "https://garak.ai/getting-started\n": "https://garak.ai/getting-started\n",
+  "https://garak.im/getting-started\n": "https://garak.im/getting-started\n",
   "설정 중 오류가 발생했습니다: {error}": "Error during setup: {error}",
   "설정을 다시 시작합니다...": "Restarting setup...",
   

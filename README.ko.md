@@ -158,7 +158,7 @@ Claude Desktop에서 "Claude will return Soon, Claude AI is currently experienci
 1. 인터넷 연결 상태를 확인하세요.
 2. 브라우저 캐시를 삭제한 후 다시 시도해보세요.
 3. 다른 브라우저를 사용해보세요.
-4. 아래 주소로 직접 접속해보세요: https://garak.ai/getting-started
+4. 아래 주소로 직접 접속해보세요: https://garak.im/getting-started
 
 #### 이메일 전송 오류
 이메일 전송 중 오류가 발생하는 경우:
@@ -175,7 +175,7 @@ Windows에서는 asdf 대신 Node.js 공식 웹사이트에서 설치 파일을 
 ## 📚 문서
 
 더 많은 예제와 팁은 가이드를 참조하세요:
-[https://garak.ai/getting-started](https://garak.ai/getting-started)
+[https://garak.im/getting-started](https://garak.im/getting-started)
 
 ## 🚧 할 일
 

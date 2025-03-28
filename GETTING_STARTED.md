@@ -250,7 +250,7 @@ Claude Desktop에서 "Claude will return Soon, Claude AI is currently experienci
 1. 인터넷 연결 상태를 확인하세요.
 2. 브라우저 캐시를 삭제한 후 다시 시도해보세요.
 3. 다른 브라우저를 사용해보세요.
-4. 직접 URL로 접속해보세요: https://garak.ai/getting-started
+4. 직접 URL로 접속해보세요: https://garak.im/getting-started
 
 ### 이메일 전송 오류
 

@@ -373,11 +373,11 @@ async function main() {
     console.log(chalk.white(__('\n"{email} 로 \"1 add 1\" 결과를 메일보내줘."', { email: userInfo.email })));
 
     console.log(chalk.cyan(__('\n더 많은 예제와 팁을 보려면 브라우저에서 가이드를 확인하세요:')));
-    console.log(chalk.blue(__('https://garak.ai/getting-started\n')));
+    console.log(chalk.blue(__('https://garak.im/getting-started\n')));
 
     // // 웹사이트 열기
     // setTimeout(() => {
-    //   open('https://garak.ai/getting-started');
+    //   open('https://garak.im/getting-started');
     // }, 2000);
 
   } catch (error) {

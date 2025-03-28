@@ -49,7 +49,7 @@ function restartClaudeDesktop() {
     // OS별 명령어
     let command = '';
     
-    
+
     
     if (process.platform === 'darwin') { // macOS
       command = 'pkill -f "Claude" && sleep 1.5 && open -a Claude';
@@ -114,7 +114,7 @@ function getTroubleshootingGuide(errorType) {
         '1. 인터넷 연결 상태를 확인하세요.',
         '2. 브라우저 캐시를 삭제한 후 다시 시도해보세요.',
         '3. 다른 브라우저를 사용해보세요.',
-        '4. 아래 주소로 직접 접속해보세요: https://garak.ai/getting-started',
+        '4. 아래 주소로 직접 접속해보세요: https://garak.im/getting-started',
         '5. 오류가 지속되면 help@garak.ai로 문의해주세요.'
       ]
     },
