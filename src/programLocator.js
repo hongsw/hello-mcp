@@ -16,16 +16,23 @@ export function checkWindowsProgram(programName) {
   const result = {
     installed: false,
     location: null,
-    version: null
+    version: null,
+    debug: {} // 디버깅 정보 추가
   };
 
   // Claude의 일반적인 설치 경로 확인
   if (programName === 'Claude') {
     const possiblePaths = [
-      path.join(os.homedir(), 'AppData', 'Local', 'AnthropicClaude', 'claude.exe')
+      path.join(os.homedir(), 'AppData', 'Local', 'AnthropicClaude', 'claude.exe'),
+      path.join(os.homedir(), 'AppData', 'Local', 'Programs', 'Claude', 'Claude.exe'),
+      path.join('C:', 'Program Files', 'Claude', 'Claude.exe'),
+      path.join('C:', 'Program Files (x86)', 'Claude', 'Claude.exe')
     ];
 
+    result.debug.searchPaths = possiblePaths;
+
     for (const claudePath of possiblePaths) {
+      result.debug.checking = claudePath;
       if (fs.existsSync(claudePath)) {
         result.installed = true;
         result.location = claudePath;
@@ -33,54 +40,47 @@ export function checkWindowsProgram(programName) {
           // Windows에서 파일 버전 정보 추출
           const versionCommand = `powershell -command "(Get-Item '${claudePath}').VersionInfo.FileVersion"`;
           result.version = execSync(versionCommand, { encoding: 'utf-8' }).trim();
+          result.debug.versionCommand = versionCommand;
+          result.debug.versionSuccess = true;
         } catch (error) {
-          // 버전 정보 추출 실패는 무시
+          result.debug.versionError = error.message;
         }
         return result;
       }
     }
-  }
 
-  try {
-    // 레지스트리를 통해 프로그램 확인 (32비트 및 64비트)
-    const registryPaths = [
-      'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
-      'HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall'
-    ];
+    // 레지스트리에서 Claude 검색
+    try {
+      const regPaths = [
+        'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Claude.exe',
+        'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\claude.exe'
+      ];
 
-    for (const regPath of registryPaths) {
-      try {
-        const command = `reg query "${regPath}" /s /f "${programName}"`;
-        const output = execSync(command, { encoding: 'utf-8' });
-        
-        if (output.includes(programName)) {
-          result.installed = true;
+      for (const regPath of regPaths) {
+        try {
+          const command = `reg query "${regPath}" /ve`;
+          const output = execSync(command, { encoding: 'utf-8' });
+          result.debug.registrySearch = { path: regPath, output };
           
-          // 설치 경로 추출 시도
-          const locationMatch = output.match(/InstallLocation\s+REG_SZ\s+(.+)/);
-          if (locationMatch) {
-            result.location = locationMatch[1].trim();
+          const match = output.match(/REG_SZ\s+(.+)/);
+          if (match) {
+            const exePath = match[1].trim();
+            if (fs.existsSync(exePath)) {
+              result.installed = true;
+              result.location = exePath;
+              return result;
+            }
           }
-          
-          // 버전 정보 추출 시도
-          const versionMatch = output.match(/DisplayVersion\s+REG_SZ\s+(.+)/);
-          if (versionMatch) {
-            result.version = versionMatch[1].trim();
-          }
-          
-          break;
+        } catch (error) {
+          result.debug.registryError = error.message;
         }
-      } catch (error) {
-        // 레지스트리 검색 실패는 무시하고 계속 진행
-        continue;
       }
+    } catch (error) {
+      result.debug.registrySearchError = error.message;
     }
-
-    return result;
-  } catch (error) {
-    // 모든 검색 방법이 실패한 경우
-    return result;
   }
+
+  return result;
 }
 
 /**
@@ -193,10 +193,16 @@ export async function restartClaudeDesktop() {
   const platform = os.platform();
   const claudeInfo = checkProgramInstallation('Claude');
   
+  console.log('재시작 디버그 정보:', {
+    platform,
+    claudeInfo
+  });
+  
   if (!claudeInfo.installed) {
     return {
       success: false,
-      message: 'Claude Desktop이 설치되어 있지 않습니다.'
+      message: 'Claude Desktop이 설치되어 있지 않습니다.',
+      debug: claudeInfo.debug
     };
   }
 
@@ -204,35 +210,45 @@ export async function restartClaudeDesktop() {
     if (platform === 'win32') {
       // Windows에서 프로세스 종료
       try {
-        execSync('taskkill /F /IM claude.exe', { stdio: 'ignore' });
+        // 대소문자 구분 없이 모든 가능한 프로세스 종료 시도
+        execSync('taskkill /F /IM "claude.exe" 2>nul || taskkill /F /IM "Claude.exe" 2>nul', { stdio: 'pipe' });
+        console.log('프로세스 종료 성공');
       } catch (error) {
-        // 프로세스가 이미 종료된 경우 무시
+        console.log('프로세스 종료 시도 중 오류 (이미 종료되었을 수 있음):', error.message);
       }
       
       // 잠시 대기 후 재시작
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Claude 재시작
-      execSync(`start "" "${claudeInfo.location}"`, { stdio: 'ignore' });
+      // Claude 재시작 - 정확한 실행 파일 이름 사용
+      const exeName = path.basename(claudeInfo.location);
+      console.log('재시작 시도:', claudeInfo.location);
+      
+      execSync(`start "" "${claudeInfo.location}"`, { stdio: 'pipe' });
       
       return {
         success: true,
-        message: 'Claude Desktop이 성공적으로 재시작되었습니다.'
+        message: 'Claude Desktop이 성공적으로 재시작되었습니다.',
+        debug: {
+          exePath: claudeInfo.location,
+          exeName
+        }
       };
       
     } else if (platform === 'darwin') {
       // macOS에서 프로세스 종료 및 재시작
       try {
-        execSync('pkill -f "Claude"', { stdio: 'ignore' });
+        execSync('pkill -f "Claude"', { stdio: 'pipe' });
+        console.log('프로세스 종료 성공');
       } catch (error) {
-        // 프로세스가 이미 종료된 경우 무시
+        console.log('프로세스 종료 시도 중 오류 (이미 종료되었을 수 있음):', error.message);
       }
       
       // 잠시 대기 후 재시작
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Claude 재시작
-      execSync('open -a Claude', { stdio: 'ignore' });
+      execSync('open -a Claude', { stdio: 'pipe' });
       
       return {
         success: true,
@@ -248,7 +264,10 @@ export async function restartClaudeDesktop() {
   } catch (error) {
     return {
       success: false,
-      message: `재시작 중 오류가 발생했습니다: ${error.message}`
+      message: `재시작 중 오류가 발생했습니다: ${error.message}`,
+      debug: {
+        errorDetails: error.stack
+      }
     };
   }
 } 
