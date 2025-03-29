@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkhello_mcp_website=self.webpackChunkhello_mcp_website||[]).push([[880],{7671:e=>{e.exports=JSON.parse('{"metadata":{"permalink":"/hello-mcp/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
