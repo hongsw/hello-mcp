@@ -4,8 +4,8 @@
   <ShortName>Hello MCP</ShortName>
   <Description>Search Hello MCP</Description>
   <InputEncoding>UTF-8</InputEncoding>
-  <Image width="16" height="16" type="image/x-icon">https://hongsw.github.io/hello-mcp/img/hello-mcp-favicon.ico</Image>
-  <Url type="text/html" method="get" template="https://hongsw.github.io/hello-mcp/search?q={searchTerms}"/>
-  <Url type="application/opensearchdescription+xml" rel="self" template="https://hongsw.github.io/hello-mcp/opensearch.xml" />
-  <moz:SearchForm>https://hongsw.github.io/hello-mcp/</moz:SearchForm>
+  <Image width="16" height="16" type="image/x-icon">https://hongsw.github.io/img/hello-mcp-favicon.ico</Image>
+  <Url type="text/html" method="get" template="https://hongsw.github.io/search?q={searchTerms}"/>
+  <Url type="application/opensearchdescription+xml" rel="self" template="https://hongsw.github.io/opensearch.xml" />
+  <moz:SearchForm>https://hongsw.github.io/</moz:SearchForm>
 </OpenSearchDescription>
